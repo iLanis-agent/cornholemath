@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cornhole Math - app</title>
+<style>
+  :root { --accent:#8a4b1f; --ink:#2b231b; --paper:#faf6f0; --soft:#f2e9dc; }
+  * { box-sizing:border-box; margin:0; }
+  body { font-family:Georgia, 'Times New Roman', serif; background:var(--paper); color:var(--ink); line-height:1.55; padding:2rem 1.2rem; }
+  main { max-width:660px; margin:0 auto; }
+  h1 { font-size:1.8rem; color:var(--accent); }
+  .boundary { background:#fdeaea; border-left:6px solid #b03030; color:#5c1c1c; border-radius:6px; padding:1rem 1.1rem; margin:1rem 0 1.4rem; }
+  .boundary strong { display:block; margin-bottom:.3rem; }
+  .panel { background:var(--soft); border-left:5px solid var(--accent); border-radius:6px; padding:1rem 1.1rem; margin-bottom:1.1rem; }
+  h2 { font-size:1.1rem; margin-bottom:.6rem; }
+  p.note { font-size:.9rem; margin-bottom:.4rem; }
+  label { display:block; font-size:.9rem; margin:.45rem 0 .1rem; }
+  input { width:100%; padding:.45rem .55rem; font-size:1rem; border:1px solid #d9c5ac; border-radius:6px; background:#fff; color:var(--ink); }
+  .out { margin-top:.7rem; font-size:.98rem; background:#fff; border:1px dashed #d9c5ac; border-radius:6px; padding:.6rem .7rem; min-height:2.4rem; }
+  .out.err { border-color:#b03030; color:#8a1f1f; font-style:normal; }
+  footer { margin-top:1.8rem; font-size:.85rem; color:#6e6252; }
+  a { color:var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Cornhole Math</h1>
+  <div class="boundary">
+    <strong>Boundary: rules arithmetic only</strong>
+    One on the board, three in the hole, cancellation scoring, first to 21. This page never rules on a foot foul or a leaning bag.
+  </div>
+
+  <div class="panel">
+    <h2>The frame truth</h2>
+    <p class="note">Board 1, hole 3, and only the difference counts.</p>
+    <label for="f-my-on">Your bags on the board</label>
+    <input id="f-my-on" type="number" min="0" max="4" step="1" value="2">
+    <label for="f-my-in">Your bags in the hole</label>
+    <input id="f-my-in" type="number" min="0" max="4" step="1" value="1">
+    <label for="f-their-on">Their bags on the board</label>
+    <input id="f-their-on" type="number" min="0" max="4" step="1" value="3">
+    <label for="f-their-in">Their bags in the hole</label>
+    <input id="f-their-in" type="number" min="0" max="4" step="1" value="0">
+    <div class="out" id="f-out"></div>
+  </div>
+
+  <div class="panel">
+    <h2>The scoreboard truth</h2>
+    <p class="note">What a frame does to the race to 21.</p>
+    <label for="s-current">Your score now</label>
+    <input id="s-current" type="number" min="0" max="20" step="1" value="15">
+    <label for="s-frame">Points you won this frame</label>
+    <input id="s-frame" type="number" min="0" max="12" step="1" value="4">
+    <div class="out" id="s-out"></div>
+  </div>
+
+  <div class="panel">
+    <h2>The comeback truth</h2>
+    <p class="note">How much a frame can actually swing.</p>
+    <label for="c-mine">Your score</label>
+    <input id="c-mine" type="number" min="0" max="20" step="1" value="6">
+    <label for="c-theirs">Their score</label>
+    <input id="c-theirs" type="number" min="0" max="20" step="1" value="20">
+    <div class="out" id="c-out"></div>
+  </div>
+
+  <footer>Cornhole Math is exact arithmetic over the game's published scoring. <a href="index.html">Why it exists</a>.</footer>
+</main>
+<script src="engine.js"></script>
+<script>
+  const num = (id) => Number(document.getElementById(id).value);
+  function show(out, fn) {
+    try {
+      const text = fn();
+      out.textContent = text;
+      out.classList.remove("err");
+    } catch (e) {
+      out.textContent = e.message;
+      out.classList.add("err");
+    }
+  }
+  const fOut = document.getElementById("f-out");
+  const sOut = document.getElementById("s-out");
+  const cOut = document.getElementById("c-out");
+  function recalc() {
+    show(fOut, () => frameTruth(num("f-my-on"), num("f-my-in"), num("f-their-on"), num("f-their-in")));
+    show(sOut, () => scoreTruth(num("s-current"), num("s-frame")));
+    show(cOut, () => comebackTruth(num("c-mine"), num("c-theirs")));
+  }
+  document.querySelectorAll("input").forEach((el) => {
+    el.addEventListener("input", recalc);
+    el.addEventListener("change", recalc);
+  });
+  recalc();
+</script>
+</body>
+</html>
